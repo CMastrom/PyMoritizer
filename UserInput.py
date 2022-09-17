@@ -79,7 +79,16 @@ class UserInput:
 			dest="PMI",
 			help="The PMI percentage. NOTE: do not input percentage but, rather, the float version thereof (e.g., not '5%' but, rather, '0.05').",
 			#action="store_true",
-			type=str
+			type=float
+		)
+
+		self._parser.add_argument(
+			"-a",
+			"--additional-monthly-principle-payment",
+			dest="ADDITIONALMONTHLYPRINCIPLEPAYMENT",
+			help="An additional principle payment per month.",
+			#action="store_true",
+			type=float
 		)
 
 		return self

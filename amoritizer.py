@@ -16,6 +16,7 @@ if __name__ == "__main__":
 	INTEREST_RATE = userInputHandler.getInterestRate()
 	timeDuration = userInputHandler.getTimeDuration()
 	PMI = userInputHandler.getPmi() # Optional argument
+	ADDITIONAL_MONTHLY_PRINCIPLE_PAYMENT = userInputHandler.getAdditionalMonthlyPrinciplePayment() # Optional argument
 
 	# Perform a bit of extra parsing for timeDuration:
 	if timeDuration[-1] != 'm':
@@ -35,12 +36,22 @@ if __name__ == "__main__":
 		termInMonths = timeDuration
 	)
 
-	YEARS_UNTIL_AT_80_PERCENT_LOAN_TO_VALUE_RATIO = financesHelper.calculateYearsUntil80Ltv(
+	(YEARS_UNTIL_AT_80_PERCENT_LOAN_TO_VALUE_RATIO, TOTAL_INTEREST_PAID) = financesHelper.calculateYearsUntil80LtvAndTotalInterest(
 		interestRate = INTEREST_RATE,
 		totalLoanAmount = SALE_PRICE - DOWN_PAYMENT,
 		salePrice = SALE_PRICE,
-		termInMonths = timeDuration
+		termInMonths = timeDuration,
+		additionalPrinciplePayment = ADDITIONAL_MONTHLY_PRINCIPLE_PAYMENT
 	)
+
+	TOTAL_PMI_PAID = None
+	if PMI is not None:
+		TOTAL_PMI_PAID = financesHelper.calculateTotalPmiPaid(
+			pmi = PMI,
+			salePrice = SALE_PRICE,
+			downPayment = DOWN_PAYMENT,
+			yearsUntil80PercentLtv = YEARS_UNTIL_AT_80_PERCENT_LOAN_TO_VALUE_RATIO
+		)
 
 	Output.outputFormattedResults(
 		salePrice = SALE_PRICE,
@@ -49,6 +60,8 @@ if __name__ == "__main__":
 		timeDuration = timeDuration,
 		monthlyMortgagePayment = MONTHLY_MORTGAGE_PAYMENT,
 		yearsUntil80Ltv = YEARS_UNTIL_AT_80_PERCENT_LOAN_TO_VALUE_RATIO,
-		pmi = PMI
+		totalInterestPaid = TOTAL_INTEREST_PAID,
+		pmi = PMI,
+		totalPmiPaid = TOTAL_PMI_PAID
 	)
 

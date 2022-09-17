@@ -25,18 +25,20 @@ class Output:
 		timeDuration: int,
 		monthlyMortgagePayment: float,
 		yearsUntil80Ltv: float,
-		pmi: float = None
+		totalInterestPaid: float,
+		pmi: float = None,
+		totalPmiPaid: float = None
 	) -> None:
 		redundantEntries = {
 			"Sale Price": salePrice,
 			"Down Payment": downPayment,
 			"Loan Amount" : salePrice - downPayment,
-			"Interest Rate": interestRate,
+			"Interest Rate (%)": interestRate * 100,
 			"Time Duration (Term)": timeDuration
 		}
 
 		if pmi is not None:
-			redundantEntries["PMI (%)"] = pmi
+			redundantEntries["PMI (%)"] = pmi * 100
 
 		Output.printRedundantResults(
 			redundantEntries = redundantEntries
@@ -44,11 +46,17 @@ class Output:
 
 		print("\n--------------------\n")
 
+		entries = {
+			"Years Until 80% LTV Is Reached": yearsUntil80Ltv,
+			"Monthly Mortgage Payment": monthlyMortgagePayment,
+			"Total Interest Paid": totalInterestPaid
+		}
+
+		if totalPmiPaid is not None:
+			entries["Total PMI Paid"] = totalPmiPaid
+
 		Output.printResults(
-			results = {
-				"Years Until 80% LTV Is Reached": yearsUntil80Ltv,
-				"Monthly Mortgage Payment": monthlyMortgagePayment
-			}
+			results = entries
 		)
 
 

@@ -28,14 +28,15 @@ class FinancesCalculator:
 		Once it hits 20% paid in principle, then it returns that
 		year corresponding to the month.
 	"""
-	def calculateYearsUntil80Ltv(
+	def calculateYearsUntil80LtvAndTotalInterest(
 		self: object,
 		interestRate: float,
 		totalLoanAmount: float,
 		salePrice: float,
 		termInMonths: int,
+		additionalPrinciplePayment: float = None,
 		monthlyMortgagePayment: float = None
-	) -> float:
+	) -> tuple:
 		if monthlyMortgagePayment is None:
 			monthlyMortgagePayment = self.calculateMonthlyMortgagePayment(
 				interestRate = interestRate,
@@ -43,18 +44,50 @@ class FinancesCalculator:
 				termInMonths = termInMonths
 			)
 
+		if additionalPrinciplePayment is None:
+			additionalPrinciplePayment = 0.0
+
 		eightyPercentLtv = salePrice * 0.80
 		principleLeft = totalLoanAmount
 		currentMonthInterest = None # Just initialize
+		totalInterestPaid = 0.0
+		yearsUntil80Ltv = 0.0
 
 		for month in range(termInMonths):
 			currentMonthInterest = (principleLeft * interestRate) / 12
+			totalInterestPaid += currentMonthInterest
 			principlePaid = monthlyMortgagePayment - currentMonthInterest
 
-			principleLeft -= principlePaid
+			principleLeft -= principlePaid + additionalPrinciplePayment
 
-			if principleLeft <= eightyPercentLtv:
-				return float(month + 1) / 12.0
+			if (
+				principleLeft <= eightyPercentLtv and 
+				yearsUntil80Ltv == 0.0
+			):
+				yearsUntil80Ltv = float(month + 1) / 12.0
+
+			if (
+				principleLeft <= 0
+			):
+				if yearsUntil80Ltv == 0.0:
+					yearsUntil80Ltv = float(termInMonths)
+					
+				break
 
 		# Default's to 0 years:
-		return 0.0
+		return (yearsUntil80Ltv, totalInterestPaid)
+
+	""" 
+		Calculate how much PMI would be paid
+		in total before getting to 0% PMI (i.e.,
+		80% LTV).
+	"""
+	def calculateTotalPmiPaid(
+		self: object,
+		pmi: float,
+		salePrice: float,
+		downPayment: float,
+		yearsUntil80PercentLtv: float
+	) -> float:
+		pmiAnnualPremium = float(salePrice - downPayment) * pmi
+		return pmiAnnualPremium * yearsUntil80PercentLtv
