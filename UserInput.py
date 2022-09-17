@@ -57,7 +57,7 @@ class UserInput:
 			"-i",
 			"--interest-rate",
 			dest="INTERESTRATE",
-			help="Interest rate associated with the mortgage loan. NOTE: do not input percentage but, rather, the float version thereof (e.g., not '5%' but, rather, '0.05')",
+			help="Interest rate associated with the mortgage loan. NOTE: do not input percentage but, rather, the float version thereof (e.g., not '5%%' but, rather, '0.05')",
 			#action="store_true",
 			type=float,
 			required=True
@@ -77,7 +77,7 @@ class UserInput:
 			"-p",
 			"--pmi",
 			dest="PMI",
-			help="The PMI percentage. NOTE: do not input percentage but, rather, the float version thereof (e.g., not '5%' but, rather, '0.05').",
+			help="The PMI percentage. NOTE: do not input percentage but, rather, the float version thereof (e.g., not '5%%' but, rather, '0.05').",
 			#action="store_true",
 			type=float
 		)
