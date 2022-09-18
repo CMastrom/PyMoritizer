@@ -91,6 +91,35 @@ class UserInput:
 			type=float
 		)
 
+		# NOTE: The NIFA arguments must all be supplied
+		# or none.
+		self._parser.add_argument(
+			"-nI",
+			"--nifa-interest-rate",
+			dest="NIFAINTERESTRATE",
+			help="The interest rate for the NIFA down payment assistance loan. For calculating the 1st mortgage NIFA loan, just use the other required parameters. NOTE: do not input percentage but, rather, the float version thereof (e.g., not '5%%' but, rather, '0.05'). NOTE: All NIFA arguments must to specified or none.",
+			#action="store_true",
+			type=float
+		)
+
+		self._parser.add_argument(
+			"-nP",
+			"--nifa-loan-percentage-amount",
+			dest="NIFALOANPERCENTAGEAMOUNT",
+			help="The percentage of the sale price that will be borrowed for NIFA down payment assistance. For calculating the 1st mortgage NIFA loan, just use the other required parameters. NOTE: do not input percentage but, rather, the float version thereof (e.g., not '5%%' but, rather, '0.05'). NOTE: All NIFA arguments must to specified or none.",
+			#action="store_true",
+			type=float
+		)
+
+		self._parser.add_argument(
+			"-nT",
+			"--nifa-loan-time-duration",
+			dest="NIFALOANTIMEDURATION",
+			help="The duration of time (term) for the NIFA down payment assistance loan. Use 'm' for months or 'y' for years (e.g., '-d 7m' or '-d 7y'). If no unit is specified, then this defaults to years. NOTE: All NIFA arguments must to specified or none.",
+			#action="store_true",
+			type=str
+		)
+
 		return self
 
 	"""

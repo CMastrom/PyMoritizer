@@ -12,6 +12,8 @@ class Output:
 	GREEN = "\033[0;32m"
 	CYAN = "\033[0;36m"
 	BOLD_GREEN = "\033[1;32m"
+	YELLOW = "\033[0;93m"
+	RED = "\033[0;31m"
 
 	"""
 		Prints the output results in 
@@ -19,45 +21,26 @@ class Output:
 	"""
 	@staticmethod
 	def outputFormattedResults(
-		salePrice: float,
-		downPayment: float,
-		interestRate: float,
-		timeDuration: int,
-		monthlyMortgagePayment: float,
-		yearsUntil80Ltv: float,
-		totalInterestPaid: float,
-		pmi: float = None,
-		totalPmiPaid: float = None
+		entries: dict,
+		redundantEntries: dict = None
 	) -> None:
-		redundantEntries = {
-			"Sale Price": salePrice,
-			"Down Payment": downPayment,
-			"Loan Amount" : salePrice - downPayment,
-			"Interest Rate (%)": interestRate * 100,
-			"Time Duration (Term)": timeDuration
-		}
+		if redundantEntries is not None:
+			Output.printRedundantResults(
+				redundantEntries = redundantEntries
+			)
 
-		if pmi is not None:
-			redundantEntries["PMI (%)"] = pmi * 100
-
-		Output.printRedundantResults(
-			redundantEntries = redundantEntries
-		)
-
-		print("\n--------------------\n")
-
-		entries = {
-			"Years Until 80% LTV Is Reached": yearsUntil80Ltv,
-			"Monthly Mortgage Payment": monthlyMortgagePayment,
-			"Total Interest Paid": totalInterestPaid
-		}
-
-		if totalPmiPaid is not None:
-			entries["Total PMI Paid"] = totalPmiPaid
+		Output.printLineBreak()
 
 		Output.printResults(
 			results = entries
 		)
+
+	"""
+		Prints a line break.
+	"""
+	@staticmethod
+	def printLineBreak() -> None:
+		print("\n--------------------\n")
 
 
 	"""
@@ -105,3 +88,21 @@ class Output:
 				redundantEntryName = redundantEntryName,
 				redundantEntry = redundantEntry
 			)
+
+	"""
+		Prints a warning message.
+	"""
+	@staticmethod
+	def printWarningMessage(
+		msg: str
+	) -> None:
+		print(f"{Output.YELLOW}WARNING: {Output.RED}{msg}{Output.RESET}")
+
+	"""
+		Prints an error message.
+	"""
+	@staticmethod
+	def printErrorMessage(
+		msg: str
+	) -> None:
+		print(f"{Output.RED}ERROR: {Output.WHITE}{msg}{Output.RESET}")
