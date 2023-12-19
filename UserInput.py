@@ -74,6 +74,15 @@ class UserInput:
 		)
 
 		self._parser.add_argument(
+			"-l",
+			"--desired-ltv",
+			dest="DESIREDLTV",
+			help="The desired remaining LTV (Loan-To-Value ratio). This is used to calculate various things, such as the interest paid.",
+			type=float,
+			required=True
+		)
+
+		self._parser.add_argument(
 			"-p",
 			"--pmi",
 			dest="PMI",

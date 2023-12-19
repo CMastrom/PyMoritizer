@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from UserInput import UserInput
-from FinancesCalculator import FinancesCalculator
+from MortgageCalculator import MortgageCalculator
 from Output import Output
 from sys import version_info, exit
 
@@ -21,8 +21,14 @@ if __name__ == "__main__":
 	DOWN_PAYMENT = userInputHandler.getDownPayment()
 	INTEREST_RATE = userInputHandler.getInterestRate()
 	timeDuration = userInputHandler.getTimeDuration()
+	DESIRED_LTV = userInputHandler.getDesiredLtv()
 	PMI = userInputHandler.getPmi() # Optional argument
 	ADDITIONAL_MONTHLY_PRINCIPLE_PAYMENT = userInputHandler.getAdditionalMonthlyPrinciplePayment() # Optional argument
+
+	# Make sure that they didn't input the percentage as * 100:
+	if DESIRED_LTV > 1 or DESIRED_LTV < 0:
+		Output.printErrorMessage("Desired LTV must be in the range [0,1], where 1 is 100%% and 0 is 0%%.")
+		exit(1)
 	
 	# The NIFA args must either (1) all be present or (2) none:
 	NIFA_INTEREST_RATE = userInputHandler.getNifaInterestRate()
@@ -67,33 +73,29 @@ if __name__ == "__main__":
 		nifaLoanTimeDuration = int(nifaLoanTimeDuration[:-1] if not nifaLoanTimeDuration[-1].isnumeric() else nifaLoanTimeDuration)
 		nifaLoanTimeDuration *= 12
 
-	financesHelper = FinancesCalculator()
-
-	MONTHLY_MORTGAGE_PAYMENT = financesHelper.calculateMonthlyMortgagePayment(
+	mortgageHelper = MortgageCalculator(
+		downPayment = DOWN_PAYMENT,
+		salePrice = SALE_PRICE,
 		interestRate = INTEREST_RATE,
-		totalLoanAmount = SALE_PRICE - DOWN_PAYMENT,
 		termInMonths = timeDuration
 	)
 
+	monthly_mortgage_payment = mortgageHelper.calculateMonthlyMortgagePayment()
+
 	# Account for additional principle payment (if applicable):
 	if ADDITIONAL_MONTHLY_PRINCIPLE_PAYMENT is not None:
-		MONTHLY_MORTGAGE_PAYMENT += ADDITIONAL_MONTHLY_PRINCIPLE_PAYMENT
+		monthly_mortgage_payment += ADDITIONAL_MONTHLY_PRINCIPLE_PAYMENT
 
-	(YEARS_UNTIL_AT_80_PERCENT_LOAN_TO_VALUE_RATIO, TOTAL_INTEREST_PAID) = financesHelper.calculateYearsUntil80LtvAndTotalInterest(
-		interestRate = INTEREST_RATE,
-		totalLoanAmount = SALE_PRICE - DOWN_PAYMENT,
-		salePrice = SALE_PRICE,
-		termInMonths = timeDuration,
+	(YEARS_UNTIL_DESIRED_LTV, TOTAL_INTEREST_PAID) = mortgageHelper.calculateYearsUntilDesiredLtvAndTotalInterest(
+		desiredLTVRatioLeft = DESIRED_LTV,
 		additionalPrinciplePayment = ADDITIONAL_MONTHLY_PRINCIPLE_PAYMENT
 	)
 
-	TOTAL_PMI_PAID = None
+	total_pmi_paid = None
 	if PMI is not None:
-		TOTAL_PMI_PAID = financesHelper.calculateTotalPmiPaid(
+		total_pmi_paid = mortgageHelper.calculateTotalPmiPaid(
 			pmi = PMI,
-			salePrice = SALE_PRICE,
-			downPayment = DOWN_PAYMENT,
-			yearsUntil80PercentLtv = YEARS_UNTIL_AT_80_PERCENT_LOAN_TO_VALUE_RATIO
+			yearsUntil80PercentLtv = YEARS_UNTIL_DESIRED_LTV if DESIRED_LTV == 0.80 else None # if they didn't calculate for 80% LTV, then pass nothing so that it internally performs that calculation
 		)
 
 	# Print formatted results:
@@ -109,13 +111,13 @@ if __name__ == "__main__":
 		redundantEntries["PMI (%)"] = f"{PMI * 100}%"
 
 	entries = {
-		"Years Until 80% LTV Is Reached": YEARS_UNTIL_AT_80_PERCENT_LOAN_TO_VALUE_RATIO,
-		"Monthly Mortgage Payment": f"${MONTHLY_MORTGAGE_PAYMENT}",
-		"Total Interest Paid": f"${TOTAL_INTEREST_PAID}"
+		f"Years Until {DESIRED_LTV * 100}% LTV Is Reached": YEARS_UNTIL_DESIRED_LTV,
+		"Monthly Mortgage Payment": f"${monthly_mortgage_payment}",
+		f"Total Interest Paid By {DESIRED_LTV * 100}% LTV": f"${TOTAL_INTEREST_PAID}"
 	}
 
-	if TOTAL_PMI_PAID is not None:
-		entries["Total PMI Paid"] = f"${TOTAL_PMI_PAID}"
+	if total_pmi_paid is not None:
+		entries["Total PMI Paid"] = f"${total_pmi_paid}"
 
 	Output.outputFormattedResults(
 		entries = entries,
@@ -124,7 +126,7 @@ if __name__ == "__main__":
 
 	# Calculate for NIFA (if applicable):
 	if NIFA_INTEREST_RATE != None:
-		(_, NIFA_TOTAL_INTEREST_PAID) = financesHelper.calculateYearsUntil80LtvAndTotalInterest(
+		(_, NIFA_TOTAL_INTEREST_PAID) = mortgageHelper.calculateYearsUntil80LtvAndTotalInterest(
 			interestRate = NIFA_INTEREST_RATE,
 			totalLoanAmount = SALE_PRICE * NIFA_LOAN_PERCENTAGE_AMOUNT,
 			salePrice = SALE_PRICE,
