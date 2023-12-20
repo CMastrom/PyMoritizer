@@ -1,6 +1,6 @@
 # PyMoritizer
 
-A python tool for calculating various mortgage related information—e.g., interest page before desired LTV is reached, years until desired LTV is reached, monthly mortgage payment, PMI paid before reaching standard 80% LTV, etc.
+A python tool for calculating various mortgage related information—e.g., interest paid before desired LTV is reached, years until desired LTV is reached, monthly mortgage payment, PMI paid before reaching standard 80% LTV, etc.
 
 ## Usage
 
