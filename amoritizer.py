@@ -29,26 +29,6 @@ if __name__ == "__main__":
 	if DESIRED_LTV > 1 or DESIRED_LTV < 0:
 		Output.printErrorMessage("Desired LTV must be in the range [0,1], where 1 is 100%% and 0 is 0%%.")
 		exit(1)
-	
-	# The NIFA args must either (1) all be present or (2) none:
-	NIFA_INTEREST_RATE = userInputHandler.getNifaInterestRate()
-	NIFA_LOAN_PERCENTAGE_AMOUNT = userInputHandler.getNifaLoanPercentageAmount()
-	nifaLoanTimeDuration = userInputHandler.getNifaLoanTimeDuration()
-
-	if (
-		(
-			NIFA_INTEREST_RATE != None or 
-			NIFA_LOAN_PERCENTAGE_AMOUNT != None or 
-			nifaLoanTimeDuration != None
-		) and
-		(
-			NIFA_INTEREST_RATE == None or
-			NIFA_LOAN_PERCENTAGE_AMOUNT == None or
-			nifaLoanTimeDuration == None 
-		)
-	):
-		Output.printErrorMessage("Nifa interest rate, loan percentage amount, and loan time duration (term) must be all specified or none specified.")
-		exit(1)
 
 	# Display a disclaimer that this
 	# program is not expert financial
@@ -64,14 +44,6 @@ if __name__ == "__main__":
 		# Treat it as a year and
 		# convert to month:
 		timeDuration *= 12
-
-	# Do ditto ^ for NIFA time duration (if applicable):
-	if (
-		nifaLoanTimeDuration != None and
-		nifaLoanTimeDuration != 'm'
-	):
-		nifaLoanTimeDuration = int(nifaLoanTimeDuration[:-1] if not nifaLoanTimeDuration[-1].isnumeric() else nifaLoanTimeDuration)
-		nifaLoanTimeDuration *= 12
 
 	mortgageHelper = MortgageCalculator(
 		downPayment = DOWN_PAYMENT,
@@ -123,32 +95,3 @@ if __name__ == "__main__":
 		entries = entries,
 		redundantEntries = redundantEntries
 	)
-
-	# Calculate for NIFA (if applicable):
-	if NIFA_INTEREST_RATE != None:
-		(_, NIFA_TOTAL_INTEREST_PAID) = mortgageHelper.calculateYearsUntil80LtvAndTotalInterest(
-			interestRate = NIFA_INTEREST_RATE,
-			totalLoanAmount = SALE_PRICE * NIFA_LOAN_PERCENTAGE_AMOUNT,
-			salePrice = SALE_PRICE,
-			termInMonths = nifaLoanTimeDuration,
-			additionalPrinciplePayment = 0.0
-		)
-
-		# Print formatted results:
-		redundantEntries = {
-			"NIFA Loan Amount (%)": f"{NIFA_LOAN_PERCENTAGE_AMOUNT * 100}%",
-			"NIFA Loan Amount ($)": f"${NIFA_LOAN_PERCENTAGE_AMOUNT * SALE_PRICE}",
-			"NIFA Loan Duration (Term)(Years)": f"{nifaLoanTimeDuration / 12} years ({nifaLoanTimeDuration} months)",
-			"NIFA Loan Interest Rate (%)": f"{NIFA_INTEREST_RATE * 100}%"
-		}
-
-		entries = {
-			"NIFA Total Interest Paid ($)": f"${NIFA_TOTAL_INTEREST_PAID}"
-		}
-
-		Output.printLineBreak()
-
-		Output.outputFormattedResults(
-			entries = entries,
-			redundantEntries = redundantEntries
-		)
